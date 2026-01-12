@@ -4,13 +4,16 @@ from datetime import datetime
 import warnings
 warnings.filterwarnings("ignore")
 
-from fieldparser import create_interpolators
-from solution_methods import rk4, boris
-from results_show import flat_trajectory, deviation_degree, three_dimensional_trajectory
 
 
-
-def solve_trajectory(m, q, x0, y0, z0, b_field, e_field, Ec0, v_direction, step, total_t, output_file, txt_name, file_name, magnet_name, magnet_type, traj_distance, method):
+def solve_trajectory(m, q, 
+                    x0, y0, z0, 
+                    b_field, e_field, 
+                    create_interpolators, rk4, boris, flat_trajectory, deviation_degree, three_dimensional_trajectory,
+                    Ec0, v_direction, 
+                    step, total_t, 
+                    output_file, txt_name, file_name, magnet_name, traj_distance, 
+                    method, current):
 
     # define some physical constants
     c = 2.99792458e8      # light speed (m/s)
@@ -42,7 +45,7 @@ def solve_trajectory(m, q, x0, y0, z0, b_field, e_field, Ec0, v_direction, step,
 
 
     # calls the interpolator function only once, so the code runs faster
-    interp_data = create_interpolators(df)
+    interp_data = create_interpolators(df, current)
 
 
     # define arrays to store the results
@@ -98,7 +101,6 @@ def solve_trajectory(m, q, x0, y0, z0, b_field, e_field, Ec0, v_direction, step,
         df_save.to_csv(f"{txt_name}.csv", index=False, float_format='%.12e')
         simulation_params = {
         'magnet_name': f'{magnet_name}',
-        'magnet_type': f'{magnet_type}',
         'timestamp': datetime.now().strftime('%Y-%m-%d_%H-%M-%S'),
         'filename': f'{txt_name}',
         '': '',

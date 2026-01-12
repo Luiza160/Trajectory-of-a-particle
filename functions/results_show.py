@@ -73,15 +73,21 @@ def deviation_degree(df_save):
     x_list = df_save['x(m)']
     y_list = df_save['y(m)']
     z_list = df_save['z(m)']
-    x_range = x_list.max() - x_list.min()
-    y_range = y_list.max() - y_list.min()
-    z_range = z_list.max() - z_list.min()
 
-    # calculte the deviation degree
-    angle01 = math.atan(z_range/x_range)
+    # Get initial and final positions (net displacement)
+    x_initial, x_final = x_list.iloc[0], x_list.iloc[-1]
+    y_initial, y_final = y_list.iloc[0], y_list.iloc[-1]
+    z_initial, z_final = z_list.iloc[0], z_list.iloc[-1]
+
+    # Calculate net displacement
+    dx = x_final - x_initial
+    dy = y_final - y_initial
+    dz = z_final - z_initial
+
+    angle01 = math.atan2(dz, dx) if abs(dx) > 1e-10 or abs(dz) > 1e-10 else 0.0
+    angle02 = math.atan2(dy, dx) if abs(dx) > 1e-10 or abs(dy) > 1e-10 else 0.0
+
     degree_angle01 = math.degrees(angle01)
-
-    angle02 = math.atan(y_range/x_range)
     degree_angle02 = math.degrees(angle02)
 
     return degree_angle01, degree_angle02
