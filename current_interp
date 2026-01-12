@@ -1,0 +1,6 @@
+import numpy as np
+from scipy.interpolate import LinearNDInterpolator
+
+
+def mean_current():
+    
