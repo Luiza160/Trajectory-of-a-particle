@@ -7,12 +7,12 @@ warnings.filterwarnings("ignore")
 
 
 def solve_trajectory(m, q, 
-                    x0, y0, z0, 
+                    x0, y0, z0, I,
                     b_field, e_field, 
-                    create_interpolators, rk4, boris, flat_trajectory, deviation_degree, three_dimensional_trajectory,
+                    create_interpolators, rk4, boris, flat_trajectory, deviation_degree, three_dimensional_trajectory, field_plot,
                     Ec0, v_direction, 
                     step, total_t, 
-                    output_file, txt_name, file_name, magnet_name, traj_distance, 
+                    output_file, output_graphic, txt_name, file_name, magnet_name, traj_distance, 
                     method, current):
 
     # define some physical constants
@@ -67,14 +67,14 @@ def solve_trajectory(m, q,
         x_vals[i], y_vals[i], z_vals[i] = x, y, z                             # instant position
         Vx_vals[i], Vy_vals[i], Vz_vals[i] = Vx, Vy, Vz                       # instant velocity
         t_vals[i] = i*step                                                    # instant of time
-        Bx_vals[i], By_vals[i], Bz_vals[i] = b_field(x, y, z, interp_data)    # instant magnetic field
+        Bx_vals[i], By_vals[i], Bz_vals[i] = b_field(x, y, z, interp_data, I)    # instant magnetic field
     
 
         if method == 'rk4':
-            x, y, z, Vx, Vy, Vz = rk4(x, y, z, Vx, Vy, Vz, step, interp_data, b_field, e_field, c, m, q)
+            x, y, z, Vx, Vy, Vz = rk4(x, y, z, Vx, Vy, Vz, step, interp_data, b_field, e_field, c, m, q, I)
 
         elif method == 'boris':
-            x, y, z, Vx, Vy, Vz = boris(x, y, z, Vx, Vy, Vz, step, c, q, m, e_field, b_field, interp_data)
+            x, y, z, Vx, Vy, Vz = boris(x, y, z, Vx, Vy, Vz, step, c, q, m, I, e_field, b_field, interp_data)
 
 
 
@@ -133,13 +133,17 @@ def solve_trajectory(m, q,
                  encoding='utf-8')
         
 
-
+    if output_graphic == True:
         flat_trajectory(df_save, total_t)
         three_dimensional_trajectory(df_save)
         degree_angle01, degree_angle02 = deviation_degree(df_save)
         print(f'The deviation degree (vertical) is approximately {degree_angle01:.2f}° ({degree_angle01})')
         print(f'The deviation degree (horizontal y-axis) is approximately {degree_angle02:.2f}° ({degree_angle02})')
+
+
+
+        field_plot(df, I)
            
     
 
-    return trajectory
+        return trajectory

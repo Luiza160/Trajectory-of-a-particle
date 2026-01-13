@@ -2,7 +2,7 @@ import numpy as np
 
 
 # Runge-Kutta 4th order method
-def rk4(x, y, z, Vx, Vy, Vz, step, interp_data, b_field, e_field, c, m, q): 
+def rk4(x, y, z, Vx, Vy, Vz, step, interp_data, b_field, e_field, c, m, q, I): 
 
     conv_m = m * 1.78266e-30      # converted mass (Kg)
     conv_q = q * 1.60218e-19        # converted charge (C)
@@ -10,7 +10,7 @@ def rk4(x, y, z, Vx, Vy, Vz, step, interp_data, b_field, e_field, c, m, q):
 
 
     def acceleration(x, y, z, Vx, Vy, Vz, interp_data, b_field, e_field):
-        Bx, By, Bz = b_field(x, y, z, interp_data)
+        Bx, By, Bz = b_field(x, y, z, interp_data, I)
         Ex, Ey, Ez = e_field(x, y, z)
 
         V2 = Vx**2 + Vy**2 + Vz**2    # squared velocity
@@ -103,7 +103,7 @@ def rk4(x, y, z, Vx, Vy, Vz, step, interp_data, b_field, e_field, c, m, q):
 
 
 
-def boris(x, y, z, Vx, Vy, Vz, dt, c, q, m, electric_field, magnetic_field, interp_data):
+def boris(x, y, z, Vx, Vy, Vz, dt, c, q, m, I, electric_field, magnetic_field, interp_data):
 
 
     conv_m = m * 1.78266e-30      # converted mass (Kg)
@@ -112,7 +112,7 @@ def boris(x, y, z, Vx, Vy, Vz, dt, c, q, m, electric_field, magnetic_field, inte
 
     # ---- fields at current position (x^n) ----
     Ex, Ey, Ez = electric_field(x, y, z)
-    Bx, By, Bz = magnetic_field(x, y, z, interp_data)
+    Bx, By, Bz = magnetic_field(x, y, z, interp_data, I)
 
     # ---- momentum at time n: p^n = gamma m v ----
     v2 = Vx*Vx + Vy*Vy + Vz*Vz
