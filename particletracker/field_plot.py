@@ -1,112 +1,19 @@
-import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import plotly.graph_objects as go
-import math
+import matplotlib.pyplot as plt
 
-from functions.fieldparser import create_interpolators
+from functions.fileparser import create_interpolators
 
+def field_plot(df, df02, I, interp_data):
 
-def flat_trajectory(df_save, total_t):
-    
-        fig = plt.figure(figsize=(15, 15))
+    #Bx, By, Bz = b_field(x, y, z, interp_data, I, I1=None, I2=None)
 
-        ax1 = fig.add_subplot(321) 
-        ax2 = fig.add_subplot(322)
-        ax3 = fig.add_subplot(323) 
+    def field_plot_2d(interp_func, df, component='Bx', res=(500, 600), y_fixed=None):
 
-        tempo = np.linspace(0, total_t, len(df_save))
-
-        ax1.plot(df_save['x(m)'], df_save['y(m)'], 'palevioletred', linewidth=1.5)
-        ax1.set_xlabel('X (m)')
-        ax1.set_ylabel('Y (m)')
-        ax1.grid(True)
-        ax1.axis()
-        ax1.set_title('XY trajectory')
-
-
-        ax2.plot(tempo, df_save['z(m)'], 'green', linewidth=1.5)
-        ax2.set_xlabel('Time')
-        ax2.set_ylabel('Z (m)')
-        ax2.grid(True)
-        ax2.axis()
-        ax2.set_title('Z trajectory')
-
-
-        ax3.plot(df_save['z(m)'], df_save['By(T)'], 'teal', linewidth=1.5)
-        ax3.set_xlabel('z(m)')
-        ax3.set_ylabel('By(T)')
-        ax3.grid(True)
-        ax2.axis()
-        ax3.set_title('By intensity along Z trajectory')
-
-
-        plt.tight_layout()
-        plt.show()
-
-
-def three_dimensional_trajectory(df_save):
-    fig = go.Figure()
-    fig.add_trace(go.Scatter3d(
-        x=df_save['x(m)'],
-        y=df_save['y(m)'],
-        z=df_save['z(m)'],
-        mode='markers'
-    ))
-    # set axis ranges properly using axis dicts and df_save columns
-    fig.update_layout(
-        title='3D Trajectory',
-        scene=dict(
-            xaxis=dict(title='x (m)'),
-            yaxis=dict(title='y (m)'),
-            zaxis=dict(title='z (m)'),
-            camera=dict(
-                eye=dict(x=1.5, y=1.5, z=1.5)
-            )
-        ),
-        width=800,
-        height=600,
-        margin=dict(r=20, l=10, b=10, t=40)
-    )
-    fig.show()
-
-
-
-def deviation_degree(df_save):
-    x_list = df_save['x(m)']
-    y_list = df_save['y(m)']
-    z_list = df_save['z(m)']
-
-    # Get initial and final positions (net displacement)
-    x_initial, x_final = x_list.iloc[0], x_list.iloc[-1]
-    y_initial, y_final = y_list.iloc[0], y_list.iloc[-1]
-    z_initial, z_final = z_list.iloc[0], z_list.iloc[-1]
-
-    # Calculate net displacement
-    dx = x_final - x_initial
-    dy = y_final - y_initial
-    dz = z_final - z_initial
-
-    angle01 = math.atan2(dz, dx) if abs(dx) > 1e-10 or abs(dz) > 1e-10 else 0.0
-    angle02 = math.atan2(dy, dx) if abs(dx) > 1e-10 or abs(dy) > 1e-10 else 0.0
-
-    degree_angle01 = math.degrees(angle01)
-    degree_angle02 = math.degrees(angle02)
-
-    return degree_angle01, degree_angle02
-
-
-def field_plot(df, I):
-
-
-    def plot_comparison_2d(interp_func, df, component='Bx', res=(500, 600), y_fixed=None):
-        
-        # Convert to numeric and ensure consistent units
         df = df.copy()
         for col in ['x_mm', 'y_mm', 'z_mm', 'Bx_T', 'By_T', 'Bz_T']:
             df[col] = pd.to_numeric(df[col], errors='coerce')
         df = df.dropna()
-        
         # Get unique coordinate values
         x_vals = np.sort(df["x_mm"].unique())
         y_vals = np.sort(df["y_mm"].unique())
@@ -160,9 +67,10 @@ def field_plot(df, I):
         
         # Evaluate interpolator at all points
         results = np.array([interp_func(p) for p in points])
-        Bx_grid = results[:, 0].reshape(X.shape)
-        By_grid = results[:, 1].reshape(X.shape)
-        Bz_grid = results[:, 2].reshape(X.shape)
+        print(results)
+        Bx_grid = results[:, "func_bx"].reshape(X.shape)
+        By_grid = results[:, "func_by"].reshape(X.shape)
+        Bz_grid = results[:, "func_bz"].reshape(X.shape)
         
         # Select the appropriate component for display
         if component == 'Bx':
@@ -193,10 +101,10 @@ def field_plot(df, I):
         return fig, (ax1, ax2)
         
     # Create interpolator
-    interp_func = create_interpolators(df, I)
+    interp_func = create_interpolators(df, df02, I)
             
     # Plot comparisons - use the vectorized version for better performance
-    plot_comparison_2d(interp_func, df, component='Bx', res=(500, 600))
-    plot_comparison_2d(interp_func, df, component='By', res=(500, 600))
-    plot_comparison_2d(interp_func, df, component='Bz', res=(500, 600))
-    plot_comparison_2d(interp_func, df, component='Bmag', res=(500, 600))
+    field_plot_2d(interp_func, df, component='Bx', res=(100, 100))
+    field_plot_2d(interp_func, df, component='By', res=(500, 600))
+    field_plot_2d(interp_func, df, component='Bz', res=(500, 600))
+    field_plot_2d(interp_func, df, component='Bmag', res=(500, 600))
