@@ -6,16 +6,19 @@ from scipy.interpolate import LinearNDInterpolator
 import warnings
 warnings.filterwarnings("ignore")
 
-def field_function_from_file(file_name):
+def field_function_from_file(file_name, separator=',', data_start=2):
 
     # data import
-    df = pd.read_csv(file_name, sep="\t", skiprows=15)
+    df = pd.read_csv(file_name, sep=separator, skiprows=(data_start-1))
     # some adjusts
-    df.drop(index=[0], inplace=True)
     df = df.dropna(axis=1)
     df = df.set_axis(["x_mm", "y_mm", "z_mm", "Bx_T", "By_T", "Bz_T"], axis=1)
     df = df.apply(pd.to_numeric, errors='coerce')
     df = df.dropna()
+
+    df['x_mm'] = df['x_mm'].apply(lambda x:x/1000)
+    df['y_mm'] = df['y_mm'].apply(lambda x:x/1000)
+    df['z_mm'] = df['z_mm'].apply(lambda x:x/1000)
 
     Bx_values = np.array(df["Bx_T"], dtype=float)
     By_values = np.array(df["By_T"], dtype=float)

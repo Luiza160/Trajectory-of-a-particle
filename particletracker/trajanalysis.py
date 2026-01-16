@@ -79,7 +79,7 @@ def plot_3d_trajectory(result ):
 
 
 
-def show_deviation_degree(result, ):
+def show_deviation_degree(result):
 
     x_list = result['x(m)']
     y_list = result['y(m)']

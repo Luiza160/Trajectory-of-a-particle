@@ -1,0 +1,8 @@
+no fim, é preciso retornar:
+    - um "desenho" com a trajetória do elétron
+    - uma tabela correlacionando a corrente aplicada no imã e a energia do próton
+    - um gráfico que represente essa correlação
+    - a função da correlação
+
+para isso, manter uma das variáveis fixas e ir alterando a outra até alcançar o desvio desejado
+    
