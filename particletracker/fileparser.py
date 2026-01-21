@@ -6,7 +6,7 @@ from scipy.interpolate import LinearNDInterpolator
 import warnings
 warnings.filterwarnings("ignore")
 
-def field_function_from_file(file_name, separator=',', data_start=2):
+def field_function_from_file(file_name, separator='\t', data_start=2):
 
     # data import
     df = pd.read_csv(file_name, sep=separator, skiprows=(data_start-1))
