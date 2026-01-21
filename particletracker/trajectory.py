@@ -1,17 +1,21 @@
 import numpy as np
+import pandas as pd
+from datetime import datetime
+import warnings
+warnings.filterwarnings("ignore")
 
 
 # Runge-Kutta 4th order method
-def rk4(x, y, z, Vx, Vy, Vz, step, interp_data, b_field, e_field, c, m, q, I): 
+def rk4(x, y, z, Vx, Vy, Vz, step, b_field, e_field, c, m, q, I): 
 
     conv_m = m * 1.78266e-30      # converted mass (Kg)
     conv_q = q * 1.60218e-19        # converted charge (C)
     const = conv_q/conv_m
 
 
-    def acceleration(x, y, z, Vx, Vy, Vz, interp_data, b_field, e_field):
-        Bx, By, Bz = b_field(x, y, z, interp_data, I)
-        Ex, Ey, Ez = e_field(x, y, z)
+    def acceleration(x, y, z, Vx, Vy, Vz, b_field, e_field):
+        Bx, By, Bz = b_field([x, y, z])
+        Ex, Ey, Ez = e_field([x, y, z])
 
         V2 = Vx**2 + Vy**2 + Vz**2    # squared velocity
 
@@ -33,7 +37,7 @@ def rk4(x, y, z, Vx, Vy, Vz, step, interp_data, b_field, e_field, c, m, q, I):
 
 
     # k1
-    ax1, ay1, az1 = acceleration(x, y, z, Vx, Vy, Vz, interp_data, b_field, e_field)
+    ax1, ay1, az1 = acceleration(x, y, z, Vx, Vy, Vz, b_field, e_field)
 
     k1_x = Vx        
     k1_y = Vy        
@@ -50,7 +54,7 @@ def rk4(x, y, z, Vx, Vy, Vz, step, interp_data, b_field, e_field, c, m, q, I):
     Vy2 = Vy + 0.5*step * k1_Vy
     Vz2 = Vz + 0.5*step * k1_Vz
 
-    ax2, ay2, az2 = acceleration(x2, y2, z2, Vx2, Vy2, Vz2, interp_data, b_field, e_field)
+    ax2, ay2, az2 = acceleration(x2, y2, z2, Vx2, Vy2, Vz2, b_field, e_field)
     k2_x = Vx2   
     k2_y = Vy2
     k2_z = Vz2
@@ -66,7 +70,7 @@ def rk4(x, y, z, Vx, Vy, Vz, step, interp_data, b_field, e_field, c, m, q, I):
     Vy3 = Vy + 0.5*step * k2_Vy
     Vz3 = Vz + 0.5*step * k2_Vz
 
-    ax3, ay3, az3 = acceleration(x3, y3, z3, Vx3, Vy3, Vz3, interp_data, b_field, e_field)
+    ax3, ay3, az3 = acceleration(x3, y3, z3, Vx3, Vy3, Vz3, b_field, e_field)
     k3_x = Vx3
     k3_y = Vy3
     k3_z = Vz3
@@ -82,7 +86,7 @@ def rk4(x, y, z, Vx, Vy, Vz, step, interp_data, b_field, e_field, c, m, q, I):
     Vy4 = Vy + step * k3_Vy
     Vz4 = Vz + step * k3_Vz
 
-    ax4, ay4, az4 = acceleration(x4, y4, z4, Vx4, Vy4, Vz4, interp_data, b_field, e_field)
+    ax4, ay4, az4 = acceleration(x4, y4, z4, Vx4, Vy4, Vz4, b_field, e_field)
     k4_x = Vx4
     k4_y = Vy4
     k4_z = Vz4
@@ -103,7 +107,7 @@ def rk4(x, y, z, Vx, Vy, Vz, step, interp_data, b_field, e_field, c, m, q, I):
 
 
 
-def boris(x, y, z, Vx, Vy, Vz, dt, c, q, m, I, electric_field, magnetic_field, interp_data):
+def boris(x, y, z, Vx, Vy, Vz, dt, c, q, m, e_field, b_field):
 
 
     conv_m = m * 1.78266e-30      # converted mass (Kg)
@@ -111,8 +115,8 @@ def boris(x, y, z, Vx, Vy, Vz, dt, c, q, m, I, electric_field, magnetic_field, i
 
 
     # ---- fields at current position (x^n) ----
-    Ex, Ey, Ez = electric_field(x, y, z)
-    Bx, By, Bz = magnetic_field(x, y, z, interp_data, I)
+    Ex, Ey, Ez = e_field([x, y, z])
+    Bx, By, Bz = b_field([x, y, z])
 
     # ---- momentum at time n: p^n = gamma m v ----
     v2 = Vx*Vx + Vy*Vy + Vz*Vz
@@ -177,3 +181,99 @@ def boris(x, y, z, Vx, Vy, Vz, dt, c, q, m, I, electric_field, magnetic_field, i
 
     return x_new, y_new, z_new, Vx_new, Vy_new, Vz_new
 
+
+def solve_trajectory(m, q, 
+                 x0, y0, z0, v_direction, Ec0,
+                 b_field, e_field,
+                 method, step, total_t, 
+                 output_file='traj_calculation_results'):
+
+
+    # define some physical constants
+    c = 2.99792458e8      # light speed (m/s)
+    gamma = 1.0 + (Ec0 / m)
+    conv_v = (np.sqrt(1.0 - 1.0/(gamma**2))) * c  # converted speed (m/s)
+
+
+    # convert and normalize velocity direction
+    ux = v_direction[0]
+    uy = v_direction[1]
+    uz = v_direction[2]
+    u = np.array([ux, uy, uz], dtype=float)
+    u_hat = u / np.linalg.norm(u)
+    Vx, Vy, Vz = conv_v * u_hat          # x, y and z velocitys (m/s)
+
+
+    x, y, z = x0, y0, z0       # initial position
+
+
+    # define arrays to store the results
+    num_steps = int(total_t/step)
+    x_vals = np.zeros(num_steps)
+    y_vals = np.zeros(num_steps)
+    z_vals = np.zeros(num_steps)
+    Vx_vals = np.zeros(num_steps)
+    Vy_vals = np.zeros(num_steps)
+    Vz_vals = np.zeros(num_steps)
+    t_vals = np.zeros(num_steps)
+    Bx_vals = np.zeros(num_steps) 
+    By_vals = np.zeros(num_steps)
+    Bz_vals = np.zeros(num_steps)
+
+
+    # main loop
+    for i in range(num_steps):
+        x_vals[i], y_vals[i], z_vals[i] = x, y, z                             # instant position
+        Vx_vals[i], Vy_vals[i], Vz_vals[i] = Vx, Vy, Vz                       # instant velocity
+        t_vals[i] = i*step                                                    # instant of time
+        Bx_vals[i], By_vals[i], Bz_vals[i] = b_field([x, y, z])               # instant magnetic field
+    
+
+        if method == 'rk4':
+            x, y, z, Vx, Vy, Vz = rk4(x, y, z, Vx, Vy, Vz, step, b_field, e_field, c, m, q)
+
+        elif method == 'boris':
+            x, y, z, Vx, Vy, Vz = boris(x, y, z, Vx, Vy, Vz, step, c, q, m, e_field, b_field)
+
+
+    # combine data into a single array
+    data = np.column_stack((x_vals, y_vals, z_vals, Vx_vals, Vy_vals, Vz_vals, Bx_vals, By_vals, Bz_vals, t_vals))
+
+
+    trajectory = pd.DataFrame(data, columns=['x(m)', 'y(m)', 'z(m)', 'Vx(m/s)', 'Vy(m/s)', 'Vz(m/s)', 'Bx(T)', 'By(T)', 'Bz(T)', 't(s)'])
+    trajectory = trajectory.dropna()
+    
+
+    # save data to file
+    header = {
+    'timestamp': datetime.now().strftime('%Y-%m-%d_%H-%M-%S'),
+    'filename': f'{output_file}',
+    '': '', 
+    'particle_mass[MeV/c²]': f'{m}',
+    'particle_charge[u.a]': f'{q}',
+    'initial_kinetic_energy[MeV]': f'{Ec0}',
+    'initial_position[m]': f'({x0}, {y0}, {z0})',
+    'initial_velocity_direction': f'{v_direction}',
+    'initial_speed[m/s]': f'{conv_v:.4e}',
+    'total_time[s]': f'{total_t:.2e}',
+    '': '',
+    'Data columns': 'x(m), y(m), z(m), Vx(m/s), Vy(m/s), Vz(m/s), Bx(T), By(T), Bz(T), t(s)',
+    '': '',
+    '=============== :BEGIN DATA': '==============='
+    }
+    header_lines = []
+    for key, value in header.items():
+        if key == '':
+            header_lines.append('')
+        elif key == 'Data columns':
+            header_lines.append(f'{value}')
+        else:
+            header_lines.append(f'{key}: {value}')
+    header_str = '\n'.join(header_lines)
+    np.savetxt(f"{output_file}.traj", data, 
+            fmt='%.12e', delimiter=',', 
+            header=header_str,
+                comments='# ',
+                encoding='utf-8')
+
+    return trajectory
