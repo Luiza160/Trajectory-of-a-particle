@@ -244,7 +244,7 @@ def solve_trajectory(m, q,
     trajectory = trajectory.dropna()
     
 
-    # save data to file
+    '''# save data to file
     header = {
     'timestamp': datetime.now().strftime('%Y-%m-%d_%H-%M-%S'),
     'filename': f'{output_file}',
@@ -274,6 +274,6 @@ def solve_trajectory(m, q,
             fmt='%.12e', delimiter=',', 
             header=header_str,
                 comments='# ',
-                encoding='utf-8')
+                encoding='utf-8')'''
 
     return trajectory

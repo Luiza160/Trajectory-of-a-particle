@@ -11,23 +11,23 @@ def field_plot(df, df02, I, interp_data):
     def field_plot_2d(interp_func, df, component='Bx', res=(500, 600), y_fixed=None):
 
         df = df.copy()
-        for col in ['x_mm', 'y_mm', 'z_mm', 'Bx_T', 'By_T', 'Bz_T']:
+        for col in ['x_m', 'y_m', 'z_m', 'Bx_T', 'By_T', 'Bz_T']:
             df[col] = pd.to_numeric(df[col], errors='coerce')
         df = df.dropna()
         # Get unique coordinate values
-        x_vals = np.sort(df["x_mm"].unique())
-        y_vals = np.sort(df["y_mm"].unique())
-        z_vals = np.sort(df["z_mm"].unique())
+        x_vals = np.sort(df["x_m"].unique())
+        y_vals = np.sort(df["y_m"].unique())
+        z_vals = np.sort(df["z_m"].unique())
         
         # Set y coordinate if not provided
         if y_fixed is None:
             y_fixed = y_vals[0]
         
         # Filter original data for this y-plane
-        df_plane = df[np.isclose(df['y_mm'], y_fixed, atol=1e-6)]
+        df_plane = df[np.isclose(df['y_m'], y_fixed, atol=1e-6)]
         
         if len(df_plane) == 0:
-            raise ValueError(f"No data found at y={y_fixed} mm")
+            raise ValueError(f"No data found at y={y_fixed} m")
         
         # Create figure with 2 subplots
         fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 6))
