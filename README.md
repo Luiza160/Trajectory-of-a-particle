@@ -4,6 +4,7 @@ The main goal of this project is to calculate the trajectory of a particle under
 ## Table of Contents
 - [Overview](#Overview)
 - [Using](#Using)
+- [Particletracker functions](#Particletracker)
 
 
 ## Overview
@@ -28,3 +29,36 @@ Once the dependencies are installed, download the main script (main_notebook.ipy
 To run the notebook:
 - Open it in your preferred environment, such as Jupyter Notebook, JupyterLab, or VS Code with the Python extension.
 - Execute the cells in order to perform the simulation.
+
+## Particletracker
+
+### particletracker.fileparser
+
+**particletracker.fileparser.field_function_from_file**
+
+`field_function_from_file(file_name, separator='\t', data_start=2)`
+
+Parameters:
+- **file_name: string**
+Complete name of the file to be used (including the extension). The file needs to be in the same folder as the notebook.
+
+- **separator: string**
+Character representing the separator of the file to be read. It can be:
+
+|   **Separator**   | **Character** |             **Description**             |
+|:-----------------:|:-------------:|:---------------------------------------:|
+|       Comma       |      ','      |           Standard CSV format           |
+|        Tab        |      '\t'     |           Tab-separated values          |
+|     Semicolon     |      ';'      |           European CSV format           |
+|        Pipe       |      '\|'     |          Pipe-separated values          |
+|       Space       |      ' '      |          Space-separated values         |
+|       Colon       |      ':'      |          Colon-separated values         |
+|  Multiple spaces  |     '\s+'     |       Regex for one or more spaces      |
+|     Whitespace    |     '\s+'     | Any whitespace (spaces, tabs, newlines) |
+|   Multiple tabs   |     '\t+'     |             One or more tabs            |
+| Mixed spaces/tabs |    '[ \t]+'    |    Any combination of spaces and tabs   |
+|    Custom regex   |     custom    |   Any regex patter matching your needs  |
+
+### particletracker.newfield
+### particletracker.trajanalysis
+### particletracker.trajectory
