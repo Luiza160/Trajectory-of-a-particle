@@ -28,7 +28,6 @@ def plot_2d_trajectory(result, total_t, xpoint, zpoint):
                             label='Magnet'))
     ax1.grid(True)
     ax1.legend()
-    ax1.set_aspect('equal', adjustable='box')
     ax1.set_title('ZX trajectory')
 
 

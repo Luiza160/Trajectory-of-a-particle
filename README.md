@@ -19,6 +19,8 @@ Before executing the code, ensure that all required Python modules are installed
 - [pandas](https://pandas.pydata.org/)
 - [plotly](https://plotly.com/python/)
 - [datetime](https://docs.python.org/3/library/datetime.html)
+- [scipy](https://scipy.org/)
+- [scikit-learn](https://scikit-learn.org/stable/index.html)
 
 If any of these packages are missing, you can install them using *pip*. For example:
 
@@ -177,7 +179,7 @@ Returns the final X-coordinate value, that should correspond to the coordinate o
     Scalar representing the mass of the particle (unit: MeV/c²).
     
     - **q: scalar**
-    Scalar representing the elementary charge of the particle (it can be 1 if the particle id a proton or -1 if the particle is a electron).
+    Scalar representing the elementary charge of the particle (it can be 1 if the particle is a proton or -1 if the particle is a electron).
     
     - **x0, y0, z0: scalar**
     Three different scalars representing the inital coordinates of the particle's trajectory (unit: m).
@@ -188,9 +190,11 @@ Returns the final X-coordinate value, that should correspond to the coordinate o
     - **Ec0: scalar**
     Scalar representing particle's initial energy (unit: MeV).
     
-    - **b_field: a**
+    - **b_field: function**
+    Function that describes the magnetic field in each coordinate. Can be obtained using *.field_function_from_file* function.    Function that describes the magnetic field in each coordinate. Can be obtained using *.field_function_from_file* function.
     
-    - **e_field: a**
+    - **e_field: function or list**
+    If the electric field is constant, this parameter can receive a list of scalars. The default list is [0, 0, 0], representing a null field. Otherwise, this parameter can receive the electric field function.
     
     - **method: string**
     String specifying the iteration method that will be used. It can be 'boris' or 'rk4'.
@@ -217,28 +221,31 @@ Returns the final X-coordinate value, that should correspond to the coordinate o
 - Parameters:
 
     - **x, y, z: scalar**
-
+    Three different scalars representing the instant coordinates of the particle (unit: m). These values will be updated at every iteration loop.
 
     - **Vx, Vy, Vz: scalar**
-
+    Three different scalars representing the instant velocitys of the particle (unit: m/s). These values will be updated at every iteration loop.
 
     - **step: scalar**
     Scalar representing the time step that will be used to calculate the iterations. It can be a value (for exalmple $10^{-6}$ seconds) or a ratio (a fraction of the total elapsed time).
     
-    - **b_field: a**
+    - **b_field: function**
+    Function that describes the magnetic field in each coordinate. Can be obtained using *.field_function_from_file* function.    Function that describes the magnetic field in each coordinate. Can be obtained using *.field_function_from_file* function.
     
-    - **e_field: a**
+    - **e_field: function or list**
+    If the electric field is constant, this parameter can receive a list of scalars. The default list is [0, 0, 0], representing a null field. Otherwise, this parameter can receive the electric field function.
     
     - **c: scalar**
-    Scalar representing the speed of light. The standard value is $2.99792458^8$
+    Scalar representing the speed of light. The standard value is $2.99792458^8$ m/s.
     
     - **m: scalar**
     Scalar representing the mass of the particle (unit: MeV/c²).
 
     - **q: scalar**
-    Scalar representing the elementary charge of the particle (it can be 1 if the particle id a proton or -1 if the particle is a electron).
+    Scalar representing the elementary charge of the particle (it can be 1 if the particle is a proton or -1 if the particle is a electron).
 
 - Returns:
+    Returns new iterated values of X, Y, Z, Vx, Vx, Vy and Vz, that will be used again, but this time, as the input values.
 
 **particletracker.trajectory.boris**
 
@@ -247,22 +254,28 @@ Returns the final X-coordinate value, that should correspond to the coordinate o
 - Parameters:
 
     - **x, y, z: scalar**
+    Three different scalars representing the instant coordinates of the particle (unit: m). These values will be updated at every iteration loop.
     
     - **Vx, Vy, Vz: scalar**
+    Three different scalars representing the instant velocitys of the particle (unit: m/s). These values will be updated at every iteration loop.
     
     - **step: scalar**
     Scalar representing the time step that will be used to calculate the iterations. It can be a value (for exalmple $10^{-6}$ seconds) or a ratio (a fraction of the total elapsed time).
     
     - **c: scalar**
+    Scalar representing the speed of light. The standard value is $2.99792458^8$ m/s.
     
     - **q: scalar**
-    Scalar representing the elementary charge of the particle (it can be 1 if the particle id a proton or -1 if the particle is a electron).
+    Scalar representing the elementary charge of the particle (it can be 1 if the particle is a proton or -1 if the particle is a electron).
     
     - **m: scalar**
     Scalar representing the mass of the particle (unit: MeV/c²).
 
-    - **e_field: a**
+    - **e_field: function or list**
+    If the electric field is constant, this parameter can receive a list of scalars. The default list is [0, 0, 0], representing a null field. Otherwise, this parameter can receive the electric field function.
     
-    - **b_field: a**
+    - **b_field: function**
+    Function that describes the magnetic field in each coordinate. Can be obtained using *.field_function_from_file* function.
 
 - Returns:
+    Returns new iterated values of X, Y, Z, Vx, Vx, Vy and Vz, that will be used again, but this time, as the input values.
