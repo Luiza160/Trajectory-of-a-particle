@@ -1,13 +1,11 @@
 import matplotlib.pyplot as plt
+from matplotlib.patches import Rectangle
 import numpy as np
 import plotly.graph_objects as go
 import math
 
 
-def plot_2d_trajectory(df, total_t, traj_distance):
-        
-    condition = df['z(m)'] > (traj_distance-abs(df['z(m)'].iloc[0]))
-    result = df.drop(df[condition].index)
+def plot_2d_trajectory(result, total_t, xpoint, zpoint):
 
     fig = plt.figure(figsize=(15, 15))
 
@@ -19,10 +17,18 @@ def plot_2d_trajectory(df, total_t, traj_distance):
     tempo = np.linspace(0, total_t, len(result))
 
     ax1.plot(result['z(m)'], result['x(m)'], 'palevioletred', linewidth=1.5)
+    ax1.scatter(zpoint, xpoint, s=70, color='k', label='Detector')
     ax1.set_xlabel('Z (m)')
     ax1.set_ylabel('X (m)')
+    ax1.add_patch(Rectangle((-0.1226, -0.07573), 0.2451, 0.154,
+                            edgecolor='blue',
+                            facecolor=None,
+                            fill=False,
+                            lw=2,
+                            label='Magnet'))
     ax1.grid(True)
-    ax1.axis()
+    ax1.legend()
+    ax1.set_aspect('equal', adjustable='box')
     ax1.set_title('ZX trajectory')
 
 
@@ -30,15 +36,13 @@ def plot_2d_trajectory(df, total_t, traj_distance):
     ax2.set_xlabel('Z (m)')
     ax2.set_ylabel('Y (m)')
     ax2.grid(True)
-    ax2.axis()
-    ax2.set_title('XY trajectory')
+    ax2.set_title('ZY trajectory')
 
 
     ax3.plot(tempo, result['x(m)'], 'green', linewidth=1.5)
     ax3.set_xlabel('Time')
     ax3.set_ylabel('X (m)')
     ax3.grid(True)
-    ax3.axis()
     ax3.set_title('X trajectory')
 
 
@@ -46,7 +50,6 @@ def plot_2d_trajectory(df, total_t, traj_distance):
     ax4.set_xlabel('z(m)')
     ax4.set_ylabel('Bx(T)')
     ax4.grid(True)
-    ax4.axis()
     ax4.set_title('Bx intensity along Z trajectory')
 
 
@@ -109,8 +112,8 @@ def show_deviation_degree(df, traj_distance):
     degree_angle01 = math.degrees(angle01)
     degree_angle02 = math.degrees(angle02)
 
-    print(f'The deviation degree (vertical) is approximately {degree_angle01:.2f}° ({degree_angle01})')
-    print(f'The deviation degree (horizontal y-axis) is approximately {degree_angle02:.2f}° ({degree_angle02})')
+    print(f'The deviation degree (horizntal) is approximately {degree_angle01:.2f}° ({degree_angle01})')
+    print(f'The deviation degree (vertical) is approximately {degree_angle02:.2f}° ({degree_angle02})')
 
     return degree_angle01
 

@@ -6,7 +6,7 @@ warnings.filterwarnings("ignore")
 
 
 # Runge-Kutta 4th order method
-def rk4(x, y, z, Vx, Vy, Vz, step, b_field, e_field, c, m, q, I): 
+def rk4(x, y, z, Vx, Vy, Vz, step, b_field, e_field, c, m, q): 
 
     conv_m = m * 1.78266e-30      # converted mass (Kg)
     conv_q = q * 1.60218e-19        # converted charge (C)
@@ -244,8 +244,8 @@ def solve_trajectory(m, q,
     trajectory = trajectory.dropna()
     
 
-    '''# save data to file
-    header = {
+    # save data to file
+    '''header = {
     'timestamp': datetime.now().strftime('%Y-%m-%d_%H-%M-%S'),
     'filename': f'{output_file}',
     '': '', 
