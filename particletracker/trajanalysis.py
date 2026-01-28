@@ -11,8 +11,8 @@ def plot_2d_trajectory(result, total_t, xpoint, zpoint):
 
     ax1 = fig.add_subplot(321) 
     ax2 = fig.add_subplot(322)
-    ax3 = fig.add_subplot(323) 
-    ax4 = fig.add_subplot(324)
+    '''ax3 = fig.add_subplot(323) 
+    ax4 = fig.add_subplot(324'''
 
     tempo = np.linspace(0, total_t, len(result))
 
@@ -27,7 +27,7 @@ def plot_2d_trajectory(result, total_t, xpoint, zpoint):
                             lw=2,
                             label='Magnet'))
     ax1.grid(True)
-    ax1.legend()
+    ax1.legend()    
     ax1.set_title('ZX trajectory')
 
 
@@ -38,7 +38,7 @@ def plot_2d_trajectory(result, total_t, xpoint, zpoint):
     ax2.set_title('ZY trajectory')
 
 
-    ax3.plot(tempo, result['x(m)'], 'green', linewidth=1.5)
+    '''ax3.plot(tempo, result['x(m)'], 'green', linewidth=1.5)
     ax3.set_xlabel('Time')
     ax3.set_ylabel('X (m)')
     ax3.grid(True)
@@ -49,11 +49,35 @@ def plot_2d_trajectory(result, total_t, xpoint, zpoint):
     ax4.set_xlabel('z(m)')
     ax4.set_ylabel('Bx(T)')
     ax4.grid(True)
-    ax4.set_title('Bx intensity along Z trajectory')
+    ax4.set_title('Bx intensity along Z trajectory')'''
 
 
     plt.tight_layout()
     plt.show()
+
+
+def plot_field_curve(S, By):
+    plt.plot(S, By, color='blue')
+    plt.xlabel('S(cm)')
+    plt.ylabel('By(G)')
+    plt.grid(True)
+    plt.title('Magnetic field x displacement')
+    plt.show()
+
+
+def plot_integrated_B(currents, areas):
+    plt.plot(currents, areas, color='blue', marker='.', markerfacecolor='k', markersize=13)
+    plt.xlabel('Current (A)')
+    plt.ylabel('Integrated manetic field (kG . cm)')
+    plt.title('Excitation curve')
+    plt.grid(True)
+
+    plt.savefig('Excitation_curve')
+
+    coefficients = np.polyfit(currents, areas, 1)
+    polynomial_function = np.poly1d(coefficients)
+
+    return polynomial_function
 
 
 def plot_3d_trajectory(df, traj_distance):
@@ -138,7 +162,7 @@ def show_deviation_in_Z(df, final_z):
     line1 = df[df['z(m)'] == Z1]
     X1 = float(line1['x(m)'])
 
-    line2 =df[df['z(m)'] == Z2]
+    line2 = df[df['z(m)'] == Z2]
     X2 = float(line2['x(m)'])
 
     c1 = (Z2 - final_z) / (Z2 - Z1)

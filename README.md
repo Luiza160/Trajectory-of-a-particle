@@ -110,15 +110,11 @@ To run the notebook:
 
 - Returns:
 
-Returns 4 graphs, containing, respectively:
+    Returns 2 graphs, containing, respectively:
 
-XZ trajectory;
+    XZ trajectory;
 
-ZY trajectory;
-
-X trajectory;
-
-Bx intensity along Z trajectory
+    ZY trajectory;
 
 **particletracker.trajanalysis.plot_3d_trajectory**
 
@@ -134,7 +130,7 @@ Bx intensity along Z trajectory
 
 - Returns:
 
-Returns an interactive 3D graph, showing the trajectory on all coordinates.
+    Returns an interactive 3D graph, showing the trajectory on all coordinates.
 
 **particletracker.trajanalysis.show_deviation_degree**
 
@@ -150,7 +146,7 @@ Returns an interactive 3D graph, showing the trajectory on all coordinates.
 
 - Returns:
 
-Returns the deviation degree along XZ axis (horizntal deviation).
+    Returns the deviation degree along XZ axis (horizntal deviation).
 
 **particletracker.trajanalysis.show_deviation_in_Z**
 
@@ -166,7 +162,7 @@ Returns the deviation degree along XZ axis (horizntal deviation).
 
 - Returns:
 
-Returns the final X-coordinate value, that should correspond to the coordinate of the detector.
+    Returns the final X-coordinate value, that should correspond to the coordinate of the detector.
 
 ### particletracker.trajectory
 
@@ -216,8 +212,6 @@ Returns the final X-coordinate value, that should correspond to the coordinate o
 
 `rk4(x, y, z, Vx, Vy, Vz, step, b_field, e_field, c, m, q)`
 
-
-
 - Parameters:
 
     - **x, y, z: scalar**
@@ -245,6 +239,7 @@ Returns the final X-coordinate value, that should correspond to the coordinate o
     Scalar representing the elementary charge of the particle (it can be 1 if the particle is a proton or -1 if the particle is a electron).
 
 - Returns:
+
     Returns new iterated values of X, Y, Z, Vx, Vx, Vy and Vz, that will be used again, but this time, as the input values.
 
 **particletracker.trajectory.boris**
@@ -278,4 +273,146 @@ Returns the final X-coordinate value, that should correspond to the coordinate o
     Function that describes the magnetic field in each coordinate. Can be obtained using *.field_function_from_file* function.
 
 - Returns:
+
     Returns new iterated values of X, Y, Z, Vx, Vx, Vy and Vz, that will be used again, but this time, as the input values.
+
+
+### particletracker.finalposition
+
+**particletracker.finalposition.finalposition_angle**
+
+`finalposition_angle(desired_degree, files, currents, m, q, x0, y0, z0, v_direction, Ec0, e_field, method, step, total_t, traj_distance)`
+
+- Parameters:
+    - **desired_degree: scalar**
+    Scalar representing the desired degree between the original trajectory and the final position.
+
+    - **files: list**
+    List containing the names of all files to be analysed (decrescent current order)
+
+    - **currents**
+    List containing the current values associated with each field from files list (decrescent order)
+
+    - **m: scalar**
+    Scalar representing the mass of the particle (unit: MeV/c²).
+
+    - **q: scalar**
+    Scalar representing the elementary charge of the particle (it can be 1 if the particle is a proton or -1 if the particle is a electron).
+
+    - **x0, y0, z0: scalar**
+    Three different scalars representing the inital coordinates of the particle's trajectory (unit: m).
+
+    - **v_direction: list**
+    List representing the velocity vector of the particle. It is used to define the velocity's angulation, not the velocity's magnitude.
+    
+    - **Ec0: scalar**
+    Scalar representing particle's initial energy (unit: MeV).
+
+    - **e_field: function or list**
+    If the electric field is constant, this parameter can receive a list of scalars. The default list is [0, 0, 0], representing a null field. Otherwise, this parameter can receive the electric field function.
+    
+    - **method: string**
+    String specifying the iteration method that will be used. It can be 'boris' or 'rk4'.
+    
+    - **step: scalar**
+    Scalar representing the time step that will be used to calculate the iterations. It can be a value (for exalmple $10^{-6}$ seconds) or a ratio (a fraction of the total elapsed time). 
+    
+    - **total_t: scalar**
+    Scalar representing the total elapsed time of the simulation (unit: s)
+
+    - **traj_distance: scalar**
+    A scalar representing the total distance traveled by the particle.
+
+- Returns:
+
+    Returns two DataFrames containing the associated energy of each current value and all the trajectory data; a list containing the intagrated areas values; two lists, containing the displacement values and the converted Y-axis magnetic field.
+
+**particletracker.finalposition.finalposition_distance**
+
+`finalposition_distance(desired_x, desired_z, files, currents, m, q, x0, y0, z0, v_direction, Ec0, e_field, method, step, total_t)`
+
+- Parameters:
+
+    - **desired_x: scalar**
+    Scalar representing the X coordinate of the center of the detector. It also represents the X coordinate of the particle's final position.
+
+    - **desired_z: scalar**
+    Scalar representing the Z coordinate of the center of the detector. It also represents the Z coordinate of the particle's final position.
+
+    - **files: list**
+    List containing the names of all files to be analysed (decrescent current order)
+
+    - **currents**
+    List containing the current values associated with each field from files list (decrescent order)
+
+    - **m: scalar**
+    Scalar representing the mass of the particle (unit: MeV/c²).
+
+    - **q: scalar**
+    Scalar representing the elementary charge of the particle (it can be 1 if the particle is a proton or -1 if the particle is a electron).
+
+    - **x0, y0, z0: scalar**
+    Three different scalars representing the inital coordinates of the particle's trajectory (unit: m).
+
+    - **v_direction: list**
+    List representing the velocity vector of the particle. It is used to define the velocity's angulation, not the velocity's magnitude.
+    
+    - **Ec0: scalar**
+    Scalar representing particle's initial energy (unit: MeV).
+
+    - **e_field: function or list**
+    If the electric field is constant, this parameter can receive a list of scalars. The default list is [0, 0, 0], representing a null field. Otherwise, this parameter can receive the electric field function.
+    
+    - **method: string**
+    String specifying the iteration method that will be used. It can be 'boris' or 'rk4'.
+    
+    - **step: scalar**
+    Scalar representing the time step that will be used to calculate the iterations. It can be a value (for exalmple $10^{-6}$ seconds) or a ratio (a fraction of the total elapsed time). 
+    
+    - **total_t: scalar**
+    Scalar representing the total elapsed time of the simulation (unit: s)
+
+- Returns:
+
+    Returns two DataFrames containing the associated energy of each current value and all the trajectory data; a list containing the intagrated areas values; two lists, containing the displacement values and the converted Y-axis magnetic field.
+
+### particletracker.findIEfunction
+
+**particletracker.findIEfunction.find_function**
+
+`find_function(chart)`
+
+- Parameters:
+
+    - **chart: DataFrame**
+    DataFrame containing the associated energy of each current value. Can be obtained using *.finalposition_distance* function.
+
+- Returns:
+
+    Returns two function models and their best parameters. These functions are inverse of each other.
+
+**particletracker.findIEfunction.plot_function**
+
+`plot_function(model01, model02, best_params01, best_params02, chart)`
+
+- Parameters:
+
+    - **model01: tuple**
+    Tuple containing a string with the model name and a callable function of this model. Can be obtained using *.find_function* function.
+    
+    - **model02: tuple**
+    Tuple containing a string with the model name and a callable function of this model. It's the inverse function of *model01*. Can be obtained using *.find_function* function.
+    
+    - **best_params01, best_params02: array**
+    Arrays with a shape that depends on the function model. Will save the best adjusted parameters to the corresponding funcions. Can be obtained using *.find_function* function.
+    
+    - **chart: DataFrame**
+    DataFrame containing the associated energy of each current value. Can be obtained using *.finalposition_distance* function.
+
+- Returns:
+
+    Returns 2 graphs, containing, respectively:
+
+    Adjusted curve of energy in function of current and shows the final function;
+
+    Adjusted curve of current in function of energy and shows the final function.

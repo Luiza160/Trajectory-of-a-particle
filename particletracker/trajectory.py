@@ -23,14 +23,14 @@ def rk4(x, y, z, Vx, Vy, Vz, step, b_field, e_field, c, m, q):
         if V2 >= c**2:
             gamma_local = 1.0e10 
         else:
-            gamma_local = 1.0 / np.sqrt(1.0 - V2/c**2)
+            gamma_local = np.sqrt(1.0 - V2/c**2)
 
 
         # applies Lorentz factor to Newton-Lorentz equations (defined at readme section)
         # defines instant acceleration based on instant velocitys and fields
-        ax = (const/gamma_local)*((Ex+Vy*Bz-Vz*By) - Vx * (gamma_local**2)/(gamma_local + 1) * (Vx*Ex+Vy*Ey+Vz*Ez))
-        ay = (const/gamma_local)*((Ey+Vz*Bx-Vx*Bz) - Vy * (gamma_local**2)/(gamma_local + 1) * (Vx*Ex+Vy*Ey+Vz*Ez))
-        az = (const/gamma_local)*((Ez+Vx*By-Vy*Bx) - Vz * (gamma_local**2)/(gamma_local + 1) * (Vx*Ex+Vy*Ey+Vz*Ez))
+        ax = (const/gamma_local)*((Ex+Vy*Bz-Vz*By) - (Vx/c**2 * (Vx*Ex+Vy*Ey+Vz*Ez)))
+        ay = (const/gamma_local)*((Ey+Vz*Bx-Vx*Bz) - (Vy/c**2 * (Vx*Ex+Vy*Ey+Vz*Ez)))
+        az = (const/gamma_local)*((Ez+Vx*By-Vy*Bx) - (Vz/c**2 * (Vx*Ex+Vy*Ey+Vz*Ez)))
 
     
         return ax, ay, az
@@ -120,7 +120,6 @@ def boris(x, y, z, Vx, Vy, Vz, dt, c, q, m, e_field, b_field):
 
     # ---- momentum at time n: p^n = gamma m v ----
     v2 = Vx*Vx + Vy*Vy + Vz*Vz
-    # numerical safety: clamp beta^2 to < 1
     beta2 = min(v2 / (c*c), 0.999999999999)
     gamma = 1.0 / ( (1.0 - beta2) ** 0.5 )
     px = gamma * conv_m * Vx
@@ -219,6 +218,7 @@ def solve_trajectory(m, q,
     Bx_vals = np.zeros(num_steps) 
     By_vals = np.zeros(num_steps)
     Bz_vals = np.zeros(num_steps)
+    dS_vals = np.zeros(num_steps)
 
 
     # main loop
@@ -227,7 +227,16 @@ def solve_trajectory(m, q,
         Vx_vals[i], Vy_vals[i], Vz_vals[i] = Vx, Vy, Vz                       # instant velocity
         t_vals[i] = i*step                                                    # instant of time
         Bx_vals[i], By_vals[i], Bz_vals[i] = b_field([x, y, z])               # instant magnetic field
-    
+
+
+        if i > 0:
+            dx = x_vals[i] - x_vals[i-1]
+            dy = y_vals[i] - y_vals[i-1]
+            dz = z_vals[i] - z_vals[i-1]
+            dS_vals[i] = dS_vals[i-1] + np.sqrt(dx**2 + dy**2 + dz**2)
+
+        else:
+            dS_vals[i] = 0
 
         if method == 'rk4':
             x, y, z, Vx, Vy, Vz = rk4(x, y, z, Vx, Vy, Vz, step, b_field, e_field, c, m, q)
@@ -236,15 +245,17 @@ def solve_trajectory(m, q,
             x, y, z, Vx, Vy, Vz = boris(x, y, z, Vx, Vy, Vz, step, c, q, m, e_field, b_field)
 
 
+
+
     # combine data into a single array
-    data = np.column_stack((x_vals, y_vals, z_vals, Vx_vals, Vy_vals, Vz_vals, Bx_vals, By_vals, Bz_vals, t_vals))
+    data = np.column_stack((x_vals, y_vals, z_vals, Vx_vals, Vy_vals, Vz_vals, Bx_vals, By_vals, Bz_vals, t_vals, dS_vals))
 
 
-    trajectory = pd.DataFrame(data, columns=['x(m)', 'y(m)', 'z(m)', 'Vx(m/s)', 'Vy(m/s)', 'Vz(m/s)', 'Bx(T)', 'By(T)', 'Bz(T)', 't(s)'])
+    trajectory = pd.DataFrame(data, columns=['x(m)', 'y(m)', 'z(m)', 'Vx(m/s)', 'Vy(m/s)', 'Vz(m/s)', 'Bx(T)', 'By(T)', 'Bz(T)', 't(s)', 'S(m)'])
     trajectory = trajectory.dropna()
     
 
-    # save data to file
+   # save data to file
     '''header = {
     'timestamp': datetime.now().strftime('%Y-%m-%d_%H-%M-%S'),
     'filename': f'{output_file}',
@@ -257,7 +268,7 @@ def solve_trajectory(m, q,
     'initial_speed[m/s]': f'{conv_v:.4e}',
     'total_time[s]': f'{total_t:.2e}',
     '': '',
-    'Data columns': 'x(m), y(m), z(m), Vx(m/s), Vy(m/s), Vz(m/s), Bx(T), By(T), Bz(T), t(s)',
+    'Data columns': 'x(m), y(m), z(m), Vx(m/s), Vy(m/s), Vz(m/s), Bx(T), By(T), Bz(T), t(s), S(m)',
     '': '',
     '=============== :BEGIN DATA': '==============='
     }
@@ -274,6 +285,6 @@ def solve_trajectory(m, q,
             fmt='%.12e', delimiter=',', 
             header=header_str,
                 comments='# ',
-                encoding='utf-8')'''
-
+                encoding='utf-8')
+'''
     return trajectory
